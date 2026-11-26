@@ -314,13 +314,36 @@
     }
   }
 
-  function buyPro() {
-    if (confirm("Тестовый режим: активировать PRO-доступ ко всем предметам и шпаргалкам (15 ⭐ / ~30 ₽)?")) {
-      isPro = true;
-      localStorage.setItem("ege_pro", "true");
-      initUI();
+  async function buyPro() {
+    if (!tg || !tg.initData) {
+      alert("Оплата в Telegram Stars работает при запуске приложения внутри Telegram-бота.");
+      return;
+    }
+
+    try {
+      const res = await fetch("https://ege-pay.iaprogdev.workers.dev");
+      const data = await res.json();
+
+      if (data.ok && data.invoiceLink) {
+        tg.openInvoice(data.invoiceLink, function(status) {
+          if (status === "paid") {
+            isPro = true;
+            localStorage.setItem("ege_pro", "true");
+            initUI();
+            tg.showAlert("🎉 Оплата прошла успешно! Открыт полный доступ ко всем заданиям.");
+          } else if (status === "failed") {
+            tg.showAlert("❌ Оплата не прошла. Попробуйте ещё раз.");
+          }
+        });
+      } else {
+        tg.showAlert("Не удалось создать счёт. Попробуйте позже.");
+      }
+    } catch (e) {
+      tg.showAlert("Ошибка соединения с сервером оплаты.");
     }
   }
+                     
+
 
   initUI();
 </script>
