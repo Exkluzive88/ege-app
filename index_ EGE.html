@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ЕГЭ на пальцах — Полный курс 2027</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #f4f6fb; --card: #ffffff; --text: #1e293b; --muted: #64748b;
+      --primary: #3b82f6; --primary-dark: #2563eb; --success: #10b981;
+      --warning-bg: #fef3c7; --warning-text: #92400e;
+      --kid-bg: #eff6ff; --kid-border: #bfdbfe; --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 16px; padding-bottom: 50px; max-width: 600px; margin: 0 auto; }
+
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .logo { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .badge { background: #dbeafe; color: var(--primary-dark); font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+
+    .subjects-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; scrollbar-width: none; }
+    .subjects-bar::-webkit-scrollbar { display: none; }
+    .subj-btn {
+      padding: 8px 14px; border-radius: 20px; border: 1px solid #cbd5e1; background: var(--card);
+      font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; white-space: nowrap;
+    }
+    .subj-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+
+    select {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid #cbd5e1;
+      background: var(--card); font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 12px; outline: none;
+    }
+
+    .task-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; scrollbar-width: none; }
+    .task-pills::-webkit-scrollbar { display: none; }
+    .pill {
+      min-width: 42px; height: 42px; border-radius: 12px; border: 2px solid #e2e8f0;
+      background: var(--card); font-weight: 700; font-size: 15px; color: var(--text);
+      display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; position: relative;
+    }
+    .pill.active { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .pill.solved { border-color: var(--success); color: var(--success); }
+    .pill.active.solved { background: var(--success); color: #fff; }
+    .pill .lock { font-size: 10px; position: absolute; top: 2px; right: 3px; }
+
+    .card { background: var(--card); border-radius: var(--radius); padding: 18px; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05); margin-bottom: 16px; }
+    .task-topic { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+    .task-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+    .task-condition { font-size: 16px; line-height: 1.55; margin-bottom: 16px; background: #f8fafc; padding: 12px; border-radius: 12px; border-left: 4px solid var(--primary); }
+
+    .answer-box { display: flex; gap: 8px; margin-bottom: 12px; }
+    input[type="text"] { flex: 1; padding: 12px 14px; border-radius: 12px; border: 2px solid #cbd5e1; font-size: 16px; outline: none; }
+    .btn { padding: 12px 18px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-kid { width: 100%; background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; margin-top: 4px; }
+    .btn-pro { width: 100%; background: linear-gradient(135deg, #f59e0b, #ea580c); color: #fff; margin-top: 12px; font-size: 16px; padding: 14px; }
+
+    .feedback { padding: 10px 14px; border-radius: 10px; font-weight: 600; font-size: 14px; margin-bottom: 12px; display: none; }
+    .feedback.ok { display: block; background: #d1fae5; color: #065f46; }
+    .feedback.err { display: block; background: #fee2e2; color: #991b1b; }
+
+    .explanation { display: none; margin-top: 16px; }
+    .explanation.open { display: block; }
+    .kid-block { background: var(--kid-bg); border: 1px solid var(--kid-border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+    .kid-block h4 { color: #1d4ed8; font-size: 15px; margin-bottom: 6px; }
+    .kid-block p { font-size: 15px; line-height: 1.5; }
+
+    .step { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+    .step-num { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+    .step-text { font-size: 15px; line-height: 1.5; }
+
+    .trap-box { background: var(--warning-bg); color: var(--warning-text); padding: 12px; border-radius: 12px; font-size: 14px; line-height: 1.45; margin-top: 10px; }
+    .cheat-box { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 12px; border-radius: 12px; font-size: 14px; margin-top: 10px; }
+    .pro-banner { background: #1e293b; color: #fff; border-radius: var(--radius); padding: 18px; text-align: center; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🧠 ЕГЭ на пальцах</div>
+    <div class="badge" id="statusBadge">Базовый тариф</div>
+  </header>
+
+  <div class="subjects-bar" id="subjectsBar"></div>
+  <select id="variantSelect" onchange="changeVariant()"></select>
+  <div class="task-pills" id="taskPills"></div>
+  <div class="card" id="taskCard"></div>
+
+  <div class="pro-banner" id="proBanner">
+    <h3>⭐ Открыть все разборы ЕГЭ-2027</h3>
+    <p style="font-size: 14px; color: #cbd5e1; margin-top: 4px;">Доступ ко всем предметам, вариантам и шпаргалкам навсегда.</p>
+    <button class="btn btn-pro" onclick="buyPro()">Открыть полный доступ — 15 ⭐ (~30 ₽)</button>
+  </div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); tg.ready(); }
+
+  // Резервная база (если файл tasks.json еще не загружен)
+  let database = [
+    {
+      subject: "Математика",
+      variants: [
+        {
+          id: "math_1",
+          title: "Вариант 1 — Полный разбор базовых тем",
+          tasks: [
+            {
+              num: 1, free: true, topic: "Проценты и деньги",
+              title: "Задание №1. Скидка на билет",
+              condition: "Билет на поезд стоит 1200 рублей. Школьникам предоставляется скидка 25%. Сколько рублей заплатит школьник за билет?",
+              answer: "900",
+              analogy: "25% — это ровно четверть (как один кусок пиццы, разрезанной на 4 части). Если из 4 кусков один тебе подарили бесплатно, заплатить нужно только за 3 куска.",
+              steps: [
+                "Находим четверть от 1200 рублей: 1200 : 4 = 300 рублей (это твоя скидка).",
+                "Вычитаем скидку из полной цены: 1200 − 300 = 900 рублей."
+              ],
+              trap: "Не запиши в ответ саму скидку (300). В вопросе спрашивают, сколько рублей ЗАПЛАТИТ школьник.",
+              cheatsheet: "25% = разделить на 4 | 50% = разделить на 2 | 10% = убрать один ноль."
+            },
+            {
+              num: 2, free: false, topic: "Геометрия",
+              title: "Задание №2. Средняя линия трапеции",
+              condition: "Основания трапеции равны 8 и 14. Найдите длину её средней линии.",
+              answer: "11",
+              analogy: "Средняя линия — это как средняя оценка в четверти. Если у тебя пятерка и тройка, средняя — четверка. Сложи оба основания и подели пополам!",
+              steps: [
+                "Складываем верхнее и нижнее основания: 8 + 14 = 22.",
+                "Делим сумму пополам: 22 : 2 = 11."
+              ],
+              trap: "Боковые стороны трапеции для поиска средней линии вообще не нужны, даже если они даны в условии — это ловушка.",
+              cheatsheet: "Средняя линия трапеции = (a + b) / 2."
+            }
+          ]
+        }
+      ]
+    }
+  ];
+
+  let curSubjIdx = 0, curVarIdx = 0, curTaskIdx = 0;
+  let isPro = localStorage.getItem("ege_pro") === "true";
+  let solvedTasks = JSON.parse(localStorage.getItem("ege_solved") || "{}");
+
+  // Автоматическая загрузка всех предметов и вариантов из соседнего файла tasks.json
+  async function loadExternalData() {
+    try {
+      const res = await fetch("tasks.json");
+      if (res.ok) {
+        const ext = await res.json();
+        if (Array.isArray(ext) && ext.length > 0) database = ext;
+      }
+    } catch (e) {}
+    initUI();
+  }
+
+  function initUI() {
+    if (isPro) {
+      document.getElementById("statusBadge").textContent = "⭐ PRO Доступ";
+      document.getElementById("proBanner").style.display = "none";
+    }
+    renderSubjects();
+  }
+
+  function renderSubjects() {
+    const bar = document.getElementById("subjectsBar");
+    bar.innerHTML = "";
+    database.forEach((s, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "subj-btn" + (idx === curSubjIdx ? " active" : "");
+      btn.textContent = s.subject;
+      btn.onclick = () => { curSubjIdx = idx; curVarIdx = 0; curTaskIdx = 0; renderSubjects(); };
+      bar.appendChild(btn);
+    });
+    renderVariants();
+  }
+
+  function renderVariants() {
+    const select = document.getElementById("variantSelect");
+    select.innerHTML = "";
+    database[curSubjIdx].variants.forEach((v, idx) => {
+      const opt = document.createElement("option");
+      opt.value = idx;
+      opt.textContent = v.title;
+      select.appendChild(opt);
+    });
+    select.value = curVarIdx;
+    renderPills();
+    renderTask();
+  }
+
+  function changeVariant() {
+    curVarIdx = Number(document.getElementById("variantSelect").value);
+    curTaskIdx = 0;
+    renderPills();
+    renderTask();
+  }
+
+  function renderPills() {
+    const container = document.getElementById("taskPills");
+    container.innerHTML = "";
+    const variant = database[curSubjIdx].variants[curVarIdx];
+    variant.tasks.forEach((t, idx) => {
+      const pill = document.createElement("div");
+      const key = `${variant.id}_${t.num}`;
+      pill.className = "pill" + (idx === curTaskIdx ? " active" : "") + (solvedTasks[key] ? " solved" : "");
+      pill.textContent = t.num;
+      if (!t.free && !isPro) {
+        const lock = document.createElement("span");
+        lock.className = "lock";
+        lock.textContent = "🔒";
+        pill.appendChild(lock);
+      }
+      pill.onclick = () => { curTaskIdx = idx; renderPills(); renderTask(); };
+      container.appendChild(pill);
+    });
+  }
+
+  function renderTask() {
+    const variant = database[curSubjIdx].variants[curVarIdx];
+    const task = variant.tasks[curTaskIdx];
+    const card = document.getElementById("taskCard");
+
+    if (!task.free && !isPro) {
+      card.innerHTML = `
+        <div class="task-topic">${task.topic}</div>
+        <div class="task-title">${task.title}</div>
+        <div class="task-condition">${task.condition}</div>
+        <div style="text-align:center; padding: 14px 0;">
+          <div style="font-size: 30px; margin-bottom: 8px;">🔒</div>
+          <p style="color: var(--muted); font-size: 14px; margin-bottom: 12px;">
+            Разбор «на пальцах», ловушка ЕГЭ и шпаргалка к этому заданию доступны в полной версии.
+          </p>
+          <button class="btn btn-primary" onclick="buyPro()">Открыть за 15 ⭐ (~30 ₽)</button>
+        </div>
+      `;
+      return;
+    }
+
+    card.innerHTML = `
+      <div class="task-topic">${task.topic}</div>
+      <div class="task-title">${task.title}</div>
+      <div class="task-condition">${task.condition}</div>
+
+      <div class="answer-box">
+        <input type="text" id="userAnswer" placeholder="Введи ответ..." />
+        <button class="btn btn-primary" onclick="checkAnswer()">Проверить</button>
+      </div>
+
+      <div class="feedback" id="feedbackBox"></div>
+
+      <button class="btn btn-kid" onclick="document.getElementById('explanationBox').classList.toggle('open')">
+        👶 Объяснить по шагам как ребенку
+      </button>
+
+      <div class="explanation" id="explanationBox">
+        <div class="kid-block">
+          <h4>💡 Простая аналогия (суть за 10 секунд)</h4>
+          <p>${task.analogy}</p>
+        </div>
+
+        <h4 style="margin-bottom: 10px; font-size: 15px;">🪜 Пошаговое решение:</h4>
+        ${task.steps.map((s, i) => `
+          <div class="step">
+            <div class="step-num">${i + 1}</div>
+            <div class="step-text">${s}</div>
+          </div>
+        `).join("")}
+
+        <div class="trap-box"><strong>⚠️ Подвох ЕГЭ:</strong> ${task.trap}</div>
+        ${task.cheatsheet ? `<div class="cheat-box"><strong>📌 Шпаргалка:</strong> ${task.cheatsheet}</div>` : ""}
+      </div>
+    `;
+  }
+
+  function checkAnswer() {
+    const variant = database[curSubjIdx].variants[curVarIdx];
+    const task = variant.tasks[curTaskIdx];
+    const input = document.getElementById("userAnswer").value.trim().toLowerCase().replace(",", ".");
+    const correct = task.answer.toLowerCase().replace(",", ".");
+    const fb = document.getElementById("feedbackBox");
+    if (!input) return;
+
+    if (input === correct) {
+      fb.className = "feedback ok";
+      fb.textContent = "🎉 Верно! Отличная работа!";
+      solvedTasks[`${variant.id}_${task.num}`] = true;
+      localStorage.setItem("ege_solved", JSON.stringify(solvedTasks));
+      renderPills();
+    } else {
+      fb.className = "feedback err";
+      fb.textContent = "❌ Пока неверно. Открой разбор ниже — там всё объяснено простым языком!";
+      document.getElementById("explanationBox").classList.add("open");
+    }
+  }
+
+  function buyPro() {
+    if (confirm("Тестовый режим: активировать PRO-доступ ко всем предметам и шпаргалкам (15 ⭐ / ~30 ₽)?")) {
+      isPro = true;
+      localStorage.setItem("ege_pro", "true");
+      initUI();
+    }
+  }
+
+  loadExternalData();
+</script>
+</body>
+</html>
