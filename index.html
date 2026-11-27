@@ -321,10 +321,31 @@
   }
 
   async function buyPro() {
-    if (!tg || !tg.initData) {
-      alert("Оплата в Telegram Stars работает при запуске приложения внутри Telegram-бота.");
-      return;
+  const isVK = window.location.search.includes("vk_app_id=");
+  if (isVK && window.vkBridge) {
+    try {
+      const res = await vkBridge.send("VKWebAppShowOrderBox", {
+        type: "item",
+        item: "full_access"
+      });
+      if (res.success) {
+        isPro = true;
+        localStorage.setItem("ege_pro", "true");
+        initUI();
+        alert("🎉 Оплата прошла успешно! Открыт полный доступ ко всем заданиям.");
+      }
+    } catch (e) {
+      if (e.error_data && e.error_data.error_code !== 4) {
+        alert("❌ Оплата не прошла. Попробуйте ещё раз.");
+      }
     }
+    return;
+  }
+
+  if (typeof tg === "undefined" || !tg || !tg.initData) {
+    alert("Оплата в Telegram Stars работает при запуске приложения внутри Telegram-бота.");
+    return;
+  }
 
     try {
       const res = await fetch("https://ege-pay.iaprogdev.workers.dev");
@@ -349,7 +370,13 @@
     }
   }
                      
-
+if (window.location.search.includes("vk_app_id=")) {
+    document.querySelectorAll("button").forEach(btn => {
+      if (btn.textContent.includes("15")) {
+        btn.textContent = "Открыть полный доступ — 5 голосов";
+      }
+    });
+  }
 
   initUI();
 </script>
