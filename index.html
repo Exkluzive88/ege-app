@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>ЕГЭ на пальцах — Полный курс 2027</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+<script>
+  if (window.vkBridge) {
+    vkBridge.send('VKWebAppInit').catch(function(e) { console.log(e); });
+  }
+</script>
   <style>
     :root {
       --bg: #f4f6fb; --card: #ffffff; --text: #1e293b; --muted: #64748b;
